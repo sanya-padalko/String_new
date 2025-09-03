@@ -2,32 +2,31 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? a : b)
+#define MAX(a, b) (((a) > (b)) ? a : b)
+
+#define my_assert(comp, code_err) if (comp) {print_err_message(__FILE__, __FUNCTION__, __LINE__, code_err); return code_err;}
 
 const int NULL_code = 48;
 const int A_code = 65;
 const int a_code = 97;
 
 void my_puts(const char* str) {
-    for (int i = 0; str[i] != '\0'; ++i) {
-        printf("%c", str[i]);
-    }
-    printf("\n");
+    while (*str != '\0')
+        printf("%c", *str++);
+    putchar('\n');
 }
 
 const char* my_strchr(const char* str, int c) {
-    for (int i = 0; str[i] != '\0'; ++i) {
-        if (str[i] == c) {
-            return &str[i];
-        }
-    }
+    while (*str != '\0')
+        if (*str++ == c)
+            return str;
     return NULL;
 }
 
 size_t my_strlen(const char* str) {
-    size_t len = 0;
-    for (int i = 0; str[i] != '\0'; ++i)
+    int len = 0; 
+    while (*str++ != '\0')
         ++len;
     return len;
 }
@@ -114,6 +113,8 @@ char* my_fgets(char* s, int size, FILE* stream) {
 }
 
 int main() {
+    int a = 0, b = 5, c = 3;
+    printf("%d\n", MIN(a < b, b < c));
     my_puts("Hello, world!");
     char str[] = "popa";
     my_strncat(str, "zhopa", 10);
