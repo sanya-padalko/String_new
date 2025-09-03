@@ -5,19 +5,43 @@
 #define MIN(a, b) (((a) < (b)) ? a : b)
 #define MAX(a, b) (((a) > (b)) ? a : b)
 
-#define my_assert(comp, code_err) if (comp) {print_err_message(__FILE__, __FUNCTION__, __LINE__, code_err); return code_err;}
+enum ERRORS {
+    NOTHING    =  0,
+    NULLPTR    =  1,
+    NAN_ERR    =  2,
+    InNFINITY  =  3
+};
+
+const char* err_msg[] = {"Pointer went equal NULL",
+                         "Variable went equal NAN",
+                         "The digit didn't become finite"};
+
+void print_err_message(const char *file_name, const char* func_name, const int n_line,
+                       const int error_code) {
+    char str[200] = "";
+
+    printf("%s in %s failed in fuction %s in line %d\n", err_msg[error_code], file_name, func_name, n_line);
+}
+
+#define my_assert(comp, code_err) if (comp) {print_err_message(__FILE__, __FUNCTION__, __LINE__, code_err);}
 
 const int NULL_code = 48;
 const int A_code = 65;
 const int a_code = 97;
 
+
+
 void my_puts(const char* str) {
+    my_assert(!str, NULLPTR);
+
     while (*str != '\0')
         printf("%c", *str++);
     putchar('\n');
 }
 
 const char* my_strchr(const char* str, int c) {
+    my_assert(!str, NULLPTR);
+
     while (*str != '\0')
         if (*str++ == c)
             return str;
@@ -25,101 +49,119 @@ const char* my_strchr(const char* str, int c) {
 }
 
 size_t my_strlen(const char* str) {
-    int len = 0; 
+    my_assert(!str, NULLPTR);
+
+    int len = 0;
     while (*str++ != '\0')
         ++len;
     return len;
 }
 
 char* my_strcpy(char* dest, const char* src) {
-    size_t len = my_strlen(src);
-    for (size_t i = 0; i < len; ++i) {
-        dest[i] = src[i];
-    }
-    dest[len] = '\0';
+    my_assert(!src, NULLPTR);
+    my_assert(!dest, NULLPTR);
+
+    int i = 0;
+    while (*src != '\0')
+        dest[i++] = *src++;
+    dest[i] = '\0';
     return dest;
 }
 
 char* my_strncpy(char* dest, const char* src, size_t n) {
-    size_t len = my_strlen(src);
-    for (size_t i = 0; i < MIN(len, n); ++i) {
-        dest[i] = src[i];
-    }
-    for (size_t i = len; i < n; ++i) {
-        dest[i] = '\0';
-    }
+    my_assert(!dest, NULLPTR);
+    my_assert(!src, NULLPTR);
+
+    int i = 0;
+    while (n-- && *src != '\0')
+        dest[i++] = *src++;
+
+    while (n--)
+        dest[i++] = '\0';
     return dest;
 }
 
 char* my_strcat(char* dest, const char* src) {
-    size_t len = my_strlen(dest);
-    size_t n = my_strlen(src);
-    for (size_t i = len; i < (len + n); ++i) {
-        dest[i] = src[i - len];
-    }
-    dest[len + n] = '\0';
+    my_assert(!dest, NULLPTR);
+    my_assert(!src, NULLPTR);
+
+    int i = 0;
+    while (dest[i++] != '\0');
+
+    while (*src != '\0')
+        dest[i++] = *src++;
+    dest[i] = '\0';
     return dest;
 }
 
 char* my_strncat(char* dest, const char* src, size_t n) {
-    size_t len = my_strlen(dest);
-    size_t len_src = my_strlen(src);
-    for (size_t i = len; i < (len + MIN(n, len_src)); ++i) {
-        dest[i] = src[i - len];
-    }
-    for (size_t i = len + len_src; i < len + n; ++i) {
-        dest[i] = '\0';
-    }
-    dest[len + n] = '\0';
+    my_assert(!dest, NULLPTR);
+    my_assert(!src, NULLPTR);
+
+    int i = 0;
+    while (n-- && *src != '\0') 
+        dest[i++] = *src++;
+
+    while (n--)
+        dest[i++] = '\0';
     return dest;
 }   
 
 int my_atoi(const char* nptr) {
-    size_t len = my_strlen(nptr);
-    size_t i = 0;
-    while (nptr[i] == ' ' && i < len) { // (i < len)?
-        ++i;
-    }
-    if (nptr[i] != '-' && !isdigit(nptr[i])) {
+    my_assert(!nptr, NULLPTR);
+
+    while (*nptr == ' ')
+        ++nptr;
+
+    if (*nptr != '-' && !isdigit(*nptr))
         return 0;
-    }
+    
     int mn = 1;
-    if (nptr[i] == '-') {
+    if (*nptr == '-') {
         mn *= -1;
-        ++i;
+        ++nptr;
     }
+
     int x = 0;
-    for (; i < len; ++i) {
-        if (isdigit(nptr[i])) {
-            x = x * 10 + (nptr[i] - NULL_code);
-        }
-        else {
+    while (*nptr != '\0') {
+        if (isdigit(*nptr))
+            x = x * 10 + (*nptr++ - NULL_code);
+        else
             break;
-        }
     }
     return x * mn;
 }
 
 char* my_fgets(char* s, int size, FILE* stream) {
-    for (size_t i = 0; i < size - 1; ++i) {
+    my_assert(!s, NULLPTR);
+    my_assert(!stream, NULLPTR);
+
+    int i = 0;
+    while (--size) {
         char c = 0;
         fscanf(stream, "%c", &c);
         if (c == EOF || c == '\n') {
             return NULL;
         }
-        s[i] = c;
+        s[i++] = c;
     }
-    s[size] = '\0';
+    s[i] = '\0';
+    return s;
+}
+
+char* my_strdup(const char* s) {
+    my_assert(!s, NULLPTR);
+
+    size_t len = my_strlen(s);
+    return (char*)calloc(len, sizeof(char));
 }
 
 int main() {
-    int a = 0, b = 5, c = 3;
-    printf("%d\n", MIN(a < b, b < c));
     my_puts("Hello, world!");
     char str[] = "popa";
     my_strncat(str, "zhopa", 10);
     my_puts(str);
-    printf("%d", my_atoi("   -138 pop"));
+    printf("%d\n", my_atoi("   -138 pop"));
     char st[10];
     my_fgets(st, 5, stdin);
     my_puts(st);
