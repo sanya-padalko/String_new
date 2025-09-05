@@ -150,7 +150,7 @@ char* my_strdup(const char* s) {
     return (char*)calloc(len, sizeof(char));
 }
 
-size_t getline(char** lineptr, size_t* n, FILE* stream) {
+size_t my_getline(char** lineptr, size_t* n, FILE* stream) {
     my_assert(!lineptr, NULLPTR);
     my_assert(!(*lineptr), NULLPTR);
     my_assert(!n, NULLPTR);
@@ -177,8 +177,9 @@ size_t getline(char** lineptr, size_t* n, FILE* stream) {
         *lineptr = (char*)realloc(*lineptr, *n);
     }
     (*lineptr)[real_size++] = '\0';
-    
+
     *n = real_size;
+    *lineptr = (char*)realloc(*lineptr, *n);
     
     return *n;
 }
@@ -194,6 +195,7 @@ int main() {
     my_puts(st);
     char* get_str = "popa";
     size_t len_str = 5;
-    getline(&get_str, &len_str, stdin);
+    my_getline(&get_str, &len_str, stdin);
     my_puts(get_str);
+    printf("%d = %d - 1", my_strlen(get_str), len_str);
 }
