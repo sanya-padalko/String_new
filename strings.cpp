@@ -1,35 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "errors.h"
 
 #define MIN(a, b) (((a) < (b)) ? a : b)
 #define MAX(a, b) (((a) > (b)) ? a : b)
 
-enum ERRORS {
-    NOTHING    =  0,
-    NULLPTR    =  1,
-    NAN_ERR    =  2,
-    InNFINITY  =  3
-};
-
-const char* err_msg[] = {"Pointer went equal NULL",
-                         "Variable went equal NAN",
-                         "The digit didn't become finite"};
-
-void print_err_message(const char *file_name, const char* func_name, const int n_line,
-                       const int error_code) {
-    char str[200] = "";
-
-    printf("%s in %s failed in fuction %s in line %d\n", err_msg[error_code], file_name, func_name, n_line);
-}
-
-#define my_assert(comp, code_err) if (comp) {print_err_message(__FILE__, __FUNCTION__, __LINE__, code_err);}
-
 const int NULL_code = 48;
 const int A_code = 65;
 const int a_code = 97;
-
-
 
 void my_puts(const char* str) {
     my_assert(!str, NULLPTR);
@@ -62,10 +41,11 @@ char* my_strcpy(char* dest, const char* src) {
     my_assert(!dest, NULLPTR);
 
     int i = 0;
+    char* result = dest;
     while (*src != '\0')
-        dest[i++] = *src++;
-    dest[i] = '\0';
-    return dest;
+        *dest++ = *src++;
+    *dest = '\0';
+    return result;
 }
 
 char* my_strncpy(char* dest, const char* src, size_t n) {
@@ -73,12 +53,14 @@ char* my_strncpy(char* dest, const char* src, size_t n) {
     my_assert(!src, NULLPTR);
 
     int i = 0;
+    char* result = dest;
     while (n-- && *src != '\0')
-        dest[i++] = *src++;
+        *dest++ = *src++;
 
     while (n--)
-        dest[i++] = '\0';
-    return dest;
+        *dest++ = '\0';
+
+    return result;
 }
 
 char* my_strcat(char* dest, const char* src) {
@@ -86,12 +68,14 @@ char* my_strcat(char* dest, const char* src) {
     my_assert(!src, NULLPTR);
 
     int i = 0;
-    while (dest[i++] != '\0');
+    char* result = dest;
+    while (*dest++ != '\0');
 
     while (*src != '\0')
-        dest[i++] = *src++;
-    dest[i] = '\0';
-    return dest;
+        *dest++ = *src++;
+    *dest = '\0';
+
+    return result;
 }
 
 char* my_strncat(char* dest, const char* src, size_t n) {
@@ -99,12 +83,15 @@ char* my_strncat(char* dest, const char* src, size_t n) {
     my_assert(!src, NULLPTR);
 
     int i = 0;
+    char* result = dest;
+
     while (n-- && *src != '\0') 
-        dest[i++] = *src++;
+        *dest++ = *src++;
 
     while (n--)
-        dest[i++] = '\0';
-    return dest;
+        *dest++ = '\0';
+
+    return result;
 }   
 
 int my_atoi(const char* nptr) {
@@ -137,16 +124,18 @@ char* my_fgets(char* s, int size, FILE* stream) {
     my_assert(!stream, NULLPTR);
 
     int i = 0;
+    char* result = s;
     while (--size) {
         char c = 0;
         fscanf(stream, "%c", &c);
         if (c == EOF || c == '\n') {
             return NULL;
         }
-        s[i++] = c;
+        *s++ = c;
     }
-    s[i] = '\0';
-    return s;
+    *s = '\0';
+
+    return result;
 }
 
 char* my_strdup(const char* s) {
