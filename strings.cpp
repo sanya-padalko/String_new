@@ -125,14 +125,19 @@ char* my_fgets(char* s, int size, FILE* stream) {
 
     int i = 0;
     char* result = s;
+    char c = 0;
+
     while (--size) {
-        char c = 0;
         fscanf(stream, "%c", &c);
         if (c == EOF || c == '\n') {
             return NULL;
         }
         *s++ = c;
     }
+
+    while (c != EOF && c != '\n')
+        fscanf(stream, "%c", &c);
+
     *s = '\0';
 
     return result;
@@ -145,6 +150,39 @@ char* my_strdup(const char* s) {
     return (char*)calloc(len, sizeof(char));
 }
 
+size_t getline(char** lineptr, size_t* n, FILE* stream) {
+    my_assert(!lineptr, NULLPTR);
+    my_assert(!(*lineptr), NULLPTR);
+    my_assert(!n, NULLPTR);
+    my_assert(!stream, NULLPTR);
+
+    *lineptr = (char*)calloc(*n, sizeof(char));
+    size_t real_size =  0;
+
+    char c = 0;
+
+    while ((c = getc(stream)) != '\n' && c != EOF) {
+        if (real_size == *n) {
+            *n += 10;
+            *lineptr = (char*)realloc(*lineptr, *n);
+        }
+        (*lineptr)[real_size++] = c;
+    }
+
+    if (c == EOF)
+        return -1;
+
+    if (real_size == *n) {
+        ++*n;
+        *lineptr = (char*)realloc(*lineptr, *n);
+    }
+    (*lineptr)[real_size++] = '\0';
+    
+    *n = real_size;
+    
+    return *n;
+}
+
 int main() {
     my_puts("Hello, world!");
     char str[] = "popa";
@@ -154,4 +192,8 @@ int main() {
     char st[10];
     my_fgets(st, 5, stdin);
     my_puts(st);
+    char* get_str = "popa";
+    size_t len_str = 5;
+    getline(&get_str, &len_str, stdin);
+    my_puts(get_str);
 }
