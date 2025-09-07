@@ -31,8 +31,10 @@ size_t my_strlen(const char* str) {
     my_assert(!str, NULLPTR);
 
     int len = 0;
+
     while (*str++ != '\0')
         ++len;
+
     return len;
 }
 
@@ -42,9 +44,12 @@ char* my_strcpy(char* dest, const char* src) {
 
     int i = 0;
     char* result = dest;
+
     while (*src != '\0')
         *dest++ = *src++;
+    
     *dest = '\0';
+
     return result;
 }
 
@@ -67,7 +72,6 @@ char* my_strcat(char* dest, const char* src) {
     my_assert(!dest, NULLPTR);
     my_assert(!src, NULLPTR);
 
-    int i = 0;
     char* result = dest;
     while (*dest++ != '\0');
 
@@ -82,7 +86,6 @@ char* my_strncat(char* dest, const char* src, size_t n) {
     my_assert(!dest, NULLPTR);
     my_assert(!src, NULLPTR);
 
-    int i = 0;
     char* result = dest;
 
     while (n-- && *src != '\0') 
@@ -123,15 +126,14 @@ char* my_fgets(char* s, int size, FILE* stream) {
     my_assert(!s, NULLPTR);
     my_assert(!stream, NULLPTR);
 
-    int i = 0;
     char* result = s;
     char c = 0;
 
     while (--size) {
         fscanf(stream, "%c", &c);
-        if (c == EOF || c == '\n') {
+        if (c == EOF || c == '\n')
             return NULL;
-        }
+        
         *s++ = c;
     }
 
@@ -143,11 +145,22 @@ char* my_fgets(char* s, int size, FILE* stream) {
     return result;
 }
 
-char* my_strdup(const char* s) {
+char* my_strdup(const char* s) {       
     my_assert(!s, NULLPTR);
 
     size_t len = my_strlen(s);
-    return (char*)calloc(len, sizeof(char));
+
+    char* new_str = (char*)calloc(len, sizeof(char));
+    my_assert(!new_str, NULLPTR);
+    char* start = new_str;
+
+    while (*s != '\0') {
+        *new_str++ = *s++;
+    }
+    
+    *new_str = '\0';
+
+    return start;
 }
 
 size_t my_getline(char** lineptr, size_t* n, FILE* stream) {
@@ -156,30 +169,41 @@ size_t my_getline(char** lineptr, size_t* n, FILE* stream) {
     my_assert(!n, NULLPTR);
     my_assert(!stream, NULLPTR);
 
-    *lineptr = (char*)calloc(*n, sizeof(char));
-    size_t real_size =  0;
+    *lineptr = (char*)calloc(*n, sizeof(char));  
+    my_assert(!lineptr, NULLPTR);
+    char* copy_ptr = *lineptr;
 
     char c = 0;
 
     while ((c = getc(stream)) != '\n' && c != EOF) {
-        if (real_size == *n) {
-            *n += 10;
-            *lineptr = (char*)realloc(*lineptr, *n);
+        int len = (*lineptr - copy_ptr);
+
+        if (len == *n) {
+            if (*n == 0) 
+                ++*n;
+
+            *n *= 2;
+            copy_ptr = (char*)realloc(copy_ptr, *n); 
+            my_assert(!copy_ptr, NULLPTR);
+
+            *lineptr = (copy_ptr + len);
         }
-        (*lineptr)[real_size++] = c;
+
+        *(*lineptr)++ = c;
     }
 
     if (c == EOF)
         return -1;
 
-    if (real_size == *n) {
-        ++*n;
-        *lineptr = (char*)realloc(*lineptr, *n);
-    }
-    (*lineptr)[real_size++] = '\0';
+    int len = (*lineptr - copy_ptr);
+    copy_ptr = (char*)realloc(copy_ptr, len + 1);
+    my_assert(!copy_ptr, NULLPTR);
 
-    *n = real_size;
-    *lineptr = (char*)realloc(*lineptr, *n);
+    *(copy_ptr + len) = '\0';
+
+    *n = len + 1;
+    
+    *lineptr = copy_ptr;
     
     return *n;
 }
@@ -190,12 +214,9 @@ int main() {
     my_strncat(str, "zhopa", 10);
     my_puts(str);
     printf("%d\n", my_atoi("   -138 pop"));
-    char st[10];
-    my_fgets(st, 5, stdin);
-    my_puts(st);
     char* get_str = "popa";
     size_t len_str = 5;
-    my_getline(&get_str, &len_str, stdin);
+    printf("%d\n", my_getline(&get_str, &len_str, stdin));
     my_puts(get_str);
     printf("%d = %d - 1", my_strlen(get_str), len_str);
 }
