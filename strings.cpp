@@ -178,7 +178,7 @@ size_t my_getline(char** lineptr, size_t* n, FILE* stream) {
     while ((c = getc(stream)) != '\n' && c != EOF) {
         int len = (*lineptr - copy_ptr);
 
-        if (len == *n) {
+        if (len + 1 == *n) {
             if (*n == 0) 
                 ++*n;
 
@@ -195,13 +195,11 @@ size_t my_getline(char** lineptr, size_t* n, FILE* stream) {
     if (c == EOF)
         return -1;
 
-    int len = (*lineptr - copy_ptr);
-    copy_ptr = (char*)realloc(copy_ptr, len + 1);
+    *(*lineptr)++ = '\0';
+
+    *n = (*lineptr - copy_ptr);
+    copy_ptr = (char*)realloc(copy_ptr, *n);
     my_assert(!copy_ptr, NULLPTR);
-
-    *(copy_ptr + len) = '\0';
-
-    *n = len + 1;
     
     *lineptr = copy_ptr;
     
